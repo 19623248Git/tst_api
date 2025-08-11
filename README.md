@@ -1,5 +1,5 @@
-current run command (without docker compose):
+run the docker-compose file:
+docker-compose up --build
 
-docker build -t tst-app .
-
-docker run -d -p 8000:80 --name prod-app tst-app
+check database:
+docker-compose exec db psql -U tstdb -d users

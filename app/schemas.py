@@ -1,14 +1,24 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from typing import Optional
 
-# Base schema for a User
-class UserBase(BaseModel):
-    username: str
+# Schema for creating a new client
+class ClientCreate(BaseModel):
+    client_name: str
     email: str
+    redirect_uri: str
 
-# Schema for reading a user from the database (will be used in API responses)
-# It doesn't include the password for security.
-class User(UserBase):
-    id: int
+# Schema for returning client info (includes plain secret ONCE)
+class ClientInfo(ClientCreate):
+    client_id: str
+    client_secret: str
 
-    class Config:
-        from_attributes = True # Pydantic v2+ (was orm_mode)
+# Schema for the JWT token response
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+# New schema for the token request body to clean up Swagger UI
+class TokenRequestForm(BaseModel):
+    grant_type: str = Field(..., pattern="client_credentials")
+    client_id: str
+    client_secret: str

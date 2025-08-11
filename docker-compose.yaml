@@ -12,6 +12,7 @@ services:
     environment:
       # The app connects to the 'db' service using this URL
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${POSTGRES_DB}
+      - SECRET_KEY=${SECRET_KEY}
     depends_on:
       - db # Tells the web service to wait for the db to be ready
 
