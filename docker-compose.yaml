@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    entrypoint: /code/entrypoint.sh
+    command: uvicorn app.main:app --host 0.0.0.0 --port 80
+    volumes:
+      - .:/code
+    ports:
+      - "8000:80" # Expose on host port 8000, container port 80
+    environment:
+      # The app connects to the 'db' service using this URL
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${POSTGRES_DB}
+    depends_on:
+      - db # Tells the web service to wait for the db to be ready
+
+  db:
+    image: postgres:14-alpine # Use an official PostgreSQL image
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/ # Persist DB data
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - "5432:5432" # Optional: expose DB port to host for debugging
+
+volumes:
+  postgres_data: # Defines the named volume for data persistence
