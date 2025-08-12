@@ -1,3 +1,5 @@
+For development:
+
 run the docker-compose file:
 docker-compose up --build
 
