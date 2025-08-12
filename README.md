@@ -1,12 +1,4 @@
-For development:
-
-run the docker-compose file:
-docker-compose up --build
-
-check database:
-docker-compose exec db psql -U tstdb -d users
-
-Simple directions on how to use API after you register (i.e. the credentials obtained from /register-client):
+Simple directions on how to use API after you register (i.e. the credentials obtained from ```/register-client```):
 ```py
     # Get access token
     token_request_body = {
@@ -23,3 +15,12 @@ Simple directions on how to use API after you register (i.e. the credentials obt
     upgrade_response = requests.post(f"{BASE_URL}/upgrade-to-exclusive", headers=headers)
     upgrade_response.raise_for_status()
 ```
+
+For local development:
+
+Run the docker-compose file:
+docker-compose up --build
+
+To check the database:
+docker-compose exec db psql -U tstdb -d users
+
