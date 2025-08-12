@@ -29,6 +29,15 @@ def create_client(db: Session, client: schemas.ClientCreate):
     db.refresh(db_client)
     return db_client, plain_secret
 
+def upgrade_client_tier(db: Session, client_id: str):
+    """Upgrades a client's tier to 'exclusive'."""
+    db_client = get_client_by_id(db, client_id=client_id)
+    if db_client:
+        db_client.tier = "exclusive"
+        db.commit()
+        db.refresh(db_client)
+    return db_client
+
 def authenticate_client(db: Session, client_id: str, client_secret: str):
     """Authenticates a client by checking its ID and secret."""
     client = get_client_by_id(db, client_id=client_id)

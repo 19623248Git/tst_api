@@ -10,6 +10,12 @@ WORKDIR /code
 # Copy the requirements file first to leverage Docker's layer caching
 COPY ./requirements.txt /code/requirements.txt
 
+# Install system dependencies for Tesseract OCR and pdf2image
+RUN apt-get update && apt-get install -y \
+    tesseract-ocr \
+    poppler-utils \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install the Python dependencies
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 

@@ -11,14 +11,28 @@ class ClientCreate(BaseModel):
 class ClientInfo(ClientCreate):
     client_id: str
     client_secret: str
+    tier: str
+
+# Schema for reading a client from the DB (doesn't include secret)
+class Client(ClientCreate):
+    client_id: str
+    tier: str
+
+    class Config:
+        from_attributes = True
 
 # Schema for the JWT token response
 class Token(BaseModel):
     access_token: str
     token_type: str
 
-# New schema for the token request body to clean up Swagger UI
+# Schema for the token request body
 class TokenRequestForm(BaseModel):
     grant_type: str = Field(..., pattern="client_credentials")
     client_id: str
     client_secret: str
+
+# New schema for the upgrade response
+class UpgradeResponse(BaseModel):
+    message: str
+    client: Client

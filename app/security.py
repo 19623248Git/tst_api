@@ -48,3 +48,16 @@ def get_current_client(token: str = Depends(oauth2_scheme), db: Session = Depend
     if client is None:
         raise credentials_exception
     return client
+
+def require_tier(required_tier: str):
+    """
+    A dependency factory that creates a dependency to check for a specific client tier.
+    """
+    def tier_checker(current_client: models.Client = Depends(get_current_client)):
+        if current_client.tier != required_tier:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"This feature requires the '{required_tier}' tier."
+            )
+        return current_client
+    return tier_checker
