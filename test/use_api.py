@@ -1,65 +1,67 @@
 import requests
 import json
 
+# --- Configuration ---
 BASE_URL = "http://localhost:8000"
-PDF_FILE_PATH = "poem2.pdf"
-TEXT_FILE_PATH = "poem2.txt"
+PDF_FILE_PATH = "sample.pdf" # Make sure this file exists
 
 # --- Paste the credentials you received from register_client.py here ---
-CLIENT_ID = "rWm0FGPhEREXZr0w3waQ9g"
-CLIENT_SECRET = "7Ema7WlHNMvyeApZxbUDClf0xx8_K6R_X3-Me4RIVR4"
+CLIENT_ID = "mKXF6gIENP_ZKBlN2D3TVw"
+CLIENT_SECRET = "WZY8uRGGKx3Yc-pVp4ztylG3va_cSvhWOeKijw1-Eao"
 # -----------------------------------------------------------------------
 
+print(f"--- Testing API access for Client ID: {CLIENT_ID} ---")
 
-# 1. Get an access token using Client Credentials
-print("Requesting access token...")
 try:
-    # The request body for the /oauth/token endpoint
+    # 1. Get an access token
     token_request_body = {
         "grant_type": "client_credentials",
         "client_id": CLIENT_ID,
         "client_secret": CLIENT_SECRET
     }
-    
     token_response = requests.post(f"{BASE_URL}/oauth/token", json=token_request_body)
     token_response.raise_for_status()
     access_token = token_response.json()["access_token"]
-    print("Successfully received access token.")
+    print("✅ Token received successfully.")
+    
+    headers = {"Authorization": f"Bearer {access_token}"}
 
-    # 2. Use the token to call the protected API endpoints
-    headers = {
-        "Authorization": f"Bearer {access_token}"
-    }
-
-    # --- Test PDF Extraction ---
+    # 2. Attempt to use the Exclusive OCR endpoint first
+    print("\n--- Attempting to use the best available feature ---")
+    print("   Trying the Exclusive '/extract-text-ocr/' endpoint...")
+    
     with open(PDF_FILE_PATH, "rb") as pdf_file:
         files = {"file": (PDF_FILE_PATH, pdf_file, "application/pdf")}
+        ocr_response = requests.post(f"{BASE_URL}/extract-text-ocr/", headers=headers, files=files)
         
-        print(f"\nUploading '{PDF_FILE_PATH}' to /extract-text/...")
-        extract_response = requests.post(f"{BASE_URL}/extract-text/", headers=headers, files=files)
-        extract_response.raise_for_status()
-
-        print("\n--- PDF Extraction Response ---")
-        print(json.dumps(extract_response.json(), indent=2))
-        print("-----------------------------")
-
-    # --- Test Text Search ---
-    with open(TEXT_FILE_PATH, "rb") as text_file:
-        data = {"keywords": ["fox", "dog", "lazy"]}
-        files = {"file": (TEXT_FILE_PATH, text_file, "text/plain")}
-
-        print(f"\nUploading '{TEXT_FILE_PATH}' to /search-text/...")
-        search_response = requests.post(f"{BASE_URL}/search-text/", headers=headers, data=data, files=files)
-        search_response.raise_for_status()
-
-        print("\n--- Text Search Response ---")
-        print(json.dumps(search_response.json(), indent=2))
-        print("--------------------------")
-
+        # Check if the client has access to the exclusive feature
+        if ocr_response.status_code == 200:
+            print("   ✅ SUCCESS: Client is on the 'exclusive' tier and has access to OCR.")
+            print("\n      --- OCR Scan Result ---")
+            print(json.dumps(ocr_response.json(), indent=2))
+            print("      -----------------------")
+        
+        # If blocked, fall back to the freemium feature
+        elif ocr_response.status_code == 403:
+            print("   ⚠️ INFO: Client is on the 'freemium' tier. Falling back to standard extraction.")
+            
+            print("\n   Trying the Freemium '/extract-text/' endpoint...")
+            with open(PDF_FILE_PATH, "rb") as pdf_file_fallback:
+                files_fallback = {"file": (PDF_FILE_PATH, pdf_file_fallback, "application/pdf")}
+                extract_response = requests.post(f"{BASE_URL}/extract-text/", headers=headers, files=files_fallback)
+                extract_response.raise_for_status()
+                print("   ✅ SUCCESS: Standard text extraction complete.")
+                print("\n      --- Standard Extraction Result ---")
+                print(json.dumps(extract_response.json(), indent=2))
+                print("      --------------------------------")
+        else:
+            # Handle other potential errors
+            ocr_response.raise_for_status()
 
 except requests.exceptions.HTTPError as e:
-    print(f"\nAPI Error: {e.response.text}")
-except FileNotFoundError as e:
-    print(f"\nError: Make sure '{e.filename}' exists in the same directory.")
+    print(f"\nAPI Error: {e.response.status_code}")
+    print(f"   Response: {e.response.text}")
+except FileNotFoundError:
+    print(f"\nError: The file '{PDF_FILE_PATH}' was not found.")
 except Exception as e:
     print(f"\nAn error occurred: {e}")
