@@ -6,7 +6,7 @@ docker-compose up --build
 check database:
 docker-compose exec db psql -U tstdb -d users
 
-Simple directions on how to use API after you register (i.e. use credentials /register-client):
+Simple directions on how to use API after you register (i.e. the credentials obtained from /register-client):
 ```py
     # Get access token
     token_request_body = {
