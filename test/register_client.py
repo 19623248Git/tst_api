@@ -3,7 +3,7 @@ import json
 import time
 
 # --- Configuration ---
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://[URL]:8000"
 
 # --- Step 1: Register a New Client Application ---
 print("--- Step 1: Registering a new client ---")

@@ -2,12 +2,12 @@ import requests
 import json
 
 # --- Configuration ---
-BASE_URL = "http://localhost:8000"
-PDF_FILE_PATH = "sample.pdf" # Make sure this file exists
+BASE_URL = "http://[URL]:8000"
+PDF_FILE_PATH = "sample_ocr.pdf" # Make sure this file exists
 
 # --- Paste the credentials you received from register_client.py here ---
-CLIENT_ID = "mKXF6gIENP_ZKBlN2D3TVw"
-CLIENT_SECRET = "WZY8uRGGKx3Yc-pVp4ztylG3va_cSvhWOeKijw1-Eao"
+CLIENT_ID = "YOUR_CLIENT_ID"
+CLIENT_SECRET = "YOUR_CLIENT_SECRET"
 # -----------------------------------------------------------------------
 
 print(f"--- Testing API access for Client ID: {CLIENT_ID} ---")

@@ -2,11 +2,11 @@ import requests
 import json
 
 # --- Configuration ---
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://[URL]:8000"
 
 # --- Credentials have been added for you ---
-CLIENT_ID = "coWH4aAceB4FG-PgEDaewQ"
-CLIENT_SECRET = "npluOpgwumHdyHLIVm4MgoRhVRHs5HAvotWCxtj1oBI"
+CLIENT_ID = "YOUR_CLIENT_ID"
+CLIENT_SECRET = "YOUR_CLIENT_SECRET"
 # -------------------------------------------
 
 print(f"--- Upgrading tier for Client ID: {CLIENT_ID} ---")
