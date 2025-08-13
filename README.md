@@ -24,3 +24,9 @@ docker-compose up --build
 To check the database:
 docker-compose exec db psql -U tstdb -d users
 
+remove the web container:
+docker-compose rm -f -s -v web
+
+build the web container:
+docker-compose up -d --build web
+

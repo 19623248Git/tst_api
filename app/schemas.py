@@ -36,3 +36,6 @@ class TokenRequestForm(BaseModel):
 class UpgradeResponse(BaseModel):
     message: str
     client: Client
+
+class DetectRequest(BaseModel):
+    text: str

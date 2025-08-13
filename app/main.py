@@ -7,6 +7,9 @@ import ahocorasick
 import pytesseract
 from pdf2image import convert_from_bytes
 from PIL import Image
+import os
+import base64
+import requests
 
 # Import setup, models, and schemas from other files in the 'app' directory
 from . import database, models, schemas, crud, security
@@ -15,6 +18,10 @@ from . import database, models, schemas, crud, security
 FREEMIUM_LIMIT_BYTES = 5 * 1024 * 1024  # 5 MB
 EXCLUSIVE_LIMIT_BYTES = 50 * 1024 * 1024 # 50 MB
 # -------------------------------------
+
+THIRD_PARTY_API_ID = os.getenv("THIRD_PARTY_API_ID")
+THIRD_PARTY_API_SECRET = os.getenv("THIRD_PARTY_API_SECRET")
+THIRD_PARTY_API_BASE_URL = "http://20.255.59.96:8000"
 
 # This command creates all the database tables based on your models
 # if they don't exist already.
@@ -185,3 +192,49 @@ async def search_text_with_aho_corasick(
         for end_index, (insert_order, original_keyword) in A.iter(text_content)
     ]
     return {"filename": file.filename, "found_keywords": found_keywords, "authorized_client": current_client.client_id, "tier_access": "freemium"}
+
+    # --- New Endpoint to Integrate with Third-Party API ---
+@app.post("/detect-explicit")
+async def detect_explicit_content(
+    data: schemas.DetectRequest,
+    current_client: models.Client = Depends(security.get_current_client)
+):
+    """
+    Protected endpoint that calls a third-party API to detect explicit content.
+    """
+    if not THIRD_PARTY_API_ID or not THIRD_PARTY_API_SECRET:
+        raise HTTPException(status_code=500, detail="Third-party API credentials are not configured on the server.")
+
+    try:
+        # 1. Get a token from the third-party API
+        credentials = f"{THIRD_PARTY_API_ID}:{THIRD_PARTY_API_SECRET}"
+        encoded_credentials = base64.b64encode(credentials.encode()).decode()
+        
+        token_response = requests.post(
+            f"{THIRD_PARTY_API_BASE_URL}/oauth/token",
+            headers={"Authorization": f"Bearer {encoded_credentials}"},
+            json={"grant_type": "client_credentials"}
+        )
+        token_response.raise_for_status()
+        third_party_token = token_response.json()["access_token"]
+
+        # 2. Use the token to call the detection endpoint
+        detect_headers = {
+            "Authorization": f"Bearer {third_party_token}",
+            "Content-Type": "application/json"
+        }
+        detect_response = requests.post(
+            f"{THIRD_PARTY_API_BASE_URL}/detect",
+            headers=detect_headers,
+            json={"text": data.text}
+        )
+        detect_response.raise_for_status()
+
+        # 3. Return the result from the third-party API to our client
+        return detect_response.json()
+
+    except requests.exceptions.HTTPError as e:
+        # Forward the error from the third-party API
+        raise HTTPException(status_code=e.response.status_code, detail=f"Error from third-party API: {e.response.text}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An internal error occurred: {e}")
