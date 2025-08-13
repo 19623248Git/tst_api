@@ -1,8 +1,10 @@
 import requests
 import json
 
+URL = "localhost"
+
 # --- Configuration ---
-BASE_URL = "http://[URL]:8000"
+BASE_URL = f"http://{URL}:8000"
 
 # --- Credentials have been added for you ---
 CLIENT_ID = "YOUR_CLIENT_ID"

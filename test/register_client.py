@@ -2,8 +2,10 @@ import requests
 import json
 import time
 
+URL = "localhost"
+
 # --- Configuration ---
-BASE_URL = "http://[URL]:8000"
+BASE_URL = f"http://{URL}:8000"
 
 # --- Step 1: Register a New Client Application ---
 print("--- Step 1: Registering a new client ---")

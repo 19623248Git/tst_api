@@ -1,8 +1,10 @@
 import requests
 import json
 
+URL = "localhost"
+
 # --- Configuration ---
-BASE_URL = "http://[URL]:8000"
+BASE_URL = f"http://{URL}:8000"
 PDF_FILE_PATH = "sample_ocr.pdf" # Make sure this file exists
 
 # --- Paste the credentials you received from register_client.py here ---
